@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	
+<mapper namespace="com.meng.dao.OrderDAO">
+	
+	<resultMap type="com.meng.model.Order" id="order">
+		<id property="oid" column="oid"/>
+		<result property="oname" column="oname"/>
+		<result property="tel" column="tel"/>
+		<result property="datea" column="datea"/>
+		<association property="time" javaType="com.meng.model.Time">
+			<id property="tid" column="tid"/>
+			<result property="tname" column="tname"/>
+		</association>
+		<association property="address" javaType="com.meng.model.Address">
+			<id property="aid" column="aid"/>
+			<result property="aname" column="aname"/>
+		</association>
+		<collection property="foodlist"  ofType="com.meng.model.Food">
+			<id property="fid" column="fid"/>
+			<result property="fname" column="fname"/>
+		</collection>
+		
+	</resultMap>
+	
+	<select id="getTimeList" resultType="com.meng.model.Time">
+		select * from t_time
+	</select>
+	
+	<select id="getAddressList" resultType="com.meng.model.Address">
+		select * from t_address	
+	</select>
+	
+	<select id="getFoodList" resultType="com.meng.model.Food">
+		select * from t_food	
+	</select>
+	
+	<select id="getMaxOid" resultType="int"> 
+		select max(oid)+1 from t_order
+	</select>
+	
+	<insert id="addOneOrder">
+		insert into t_order(oid,oname,tel,time_id,address_id)
+		values(${oid},#{oname},#{tel},${time.tid},${address.aid})
+	</insert>
+	
+	<insert id="addOrderFood">
+		insert into t_order_food(order_id,food_id) values(${order.oid},${i})
+	</insert>
+	
+	<select id="getOrderList" resultMap="order">
+		select * from t_order o left join t_time t
+		on o.time_id=t.tid left join t_address a 
+		on o.address_id=a.aid left join  t_order_food of
+		on o.oid=of.order_id left join t_food f
+		on of.food_id=f.fid limit #{startIndex},#{pageSize}
+	</select>
+	
+	<select id="getOrderCount" resultType="int">
+		select count(*) from t_order
+	</select>
+</mapper>
